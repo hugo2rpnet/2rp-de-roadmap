@@ -1,0 +1,37 @@
+--Create tables
+	create table work_dataeng.generation_hugo(
+	    generation int,
+	    date_introduced date
+	) 
+	stored as orc;
+
+
+	create table work_dataeng.pokemon_anderson (
+		idnum   int, 
+		name string, 
+		hp  int,
+		speed   int,
+		attack  int,
+		special_attack  int, 
+		defense int, 
+		special_defense int, 
+		generation  int
+	) 
+	stored as orc;
+
+--Data ingestion
+
+	load data inpath 'hdfs://bigdataclu-ns/user/2rp-anderson/pokemon.csv' into table work_dataeng.pokemon_anderson_temp;
+
+	insert into work_dataeng.pokemon_anderson select * from work_dataeng.pokemon_anderson_temp;
+
+--Join
+	--Hive: 1min33seg
+		select * from work_dataeng.pokemon_hugo p  
+		join work_dataeng.generation_hugo g  
+		on p.generation = g.generation;
+
+	--Impala:1.31 seg 
+		select G.generation, P.* from work_dataeng.generation_hugo G
+		join work_dataeng.pokemon_hugo P  
+		on G.generation = P.generation;
